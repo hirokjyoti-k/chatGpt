@@ -14,7 +14,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<app.runtime>4.4.0-20230320</app.runtime>
-		<mule.maven.plugin.version>3.8.2</mule.maven.plugin.version>
+		<mule.maven.plugin.version>3.8.7</mule.maven.plugin.version>
 	</properties>
 
 	<build>
@@ -24,27 +24,29 @@
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>3.2.0</version>
 			</plugin>
+			
 			<plugin>
-				<groupId>org.mule.tools.maven</groupId>
-				<artifactId>mule-maven-plugin</artifactId>
-				<version>${mule.maven.plugin.version}</version>
-				<extensions>true</extensions>
-				<configuration>
-					<classifier>mule-application</classifier>
-					<cloudHubDeployment>
-						<uri>https://anypoint.mulesoft.com</uri>
-						<muleVersion>${cloudhub.version}</muleVersion>
-						<username>${cloudhub.username}</username>
-						<password>${cloudhub.password}</password>
-						<applicationName>${cloudhub.appname}</applicationName>
-						<environment>${cloudhub.env}</environment>
-						<region>${cloudhub.region}</region>
-						<workerType>${cloudhub.workerType}</workerType>
-						<workers>${cloudhub.workers}</workers>
-					</cloudHubDeployment>
-				</configuration>
+			  <groupId>org.mule.tools.maven</groupId>
+			  <artifactId>mule-maven-plugin</artifactId>
+			  <version>${mule.maven.plugin.version}</version>
+			  <extensions>true</extensions>
+			  <configuration>
+			    <cloudHubDeployment>
+			      <uri>https://anypoint.mulesoft.com</uri>
+			      <muleVersion>${app.runtime}</muleVersion>
+			      <username>${username}</username>
+			      <password>${password}</password>
+			      <applicationName>${cloudhub.application.name}</applicationName>
+			      <environment>${environment}</environment>
+			      <region>${region}</region>
+			      <workers>${workers}</workers>
+			      <workerType>${workerType}</workerType>
+			      <properties>
+			        <key>value</key>
+			      </properties>
+			    </cloudHubDeployment>
+			  </configuration>
 			</plugin>
-		</plugins>
 	</build>
 
 	<dependencies>
