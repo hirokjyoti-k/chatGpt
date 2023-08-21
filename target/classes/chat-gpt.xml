@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6776fd43-d552-46fa-af81-b23e03b4c7b3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="fa363d34-2902-4339-9ff3-7bff57a97d8d" >
+		<http:request-connection protocol="HTTPS" host="api.openai.com" />
+		<http:default-headers >
+			<http:default-header key="Authorization" value="Bearer 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" />
+		</http:default-headers>
+	</http:request-config>
+	<flow name="chat-gptFlow" doc:id="9948effc-2a52-4020-a729-bd53da3ed9b6" >
+		<http:listener doc:name="Listener" doc:id="d457578f-4fe3-4f2e-b3ae-89d04cc8e898" config-ref="HTTP_Listener_config" path="/test"/>
+		<logger level="INFO" doc:name="Start Logger" doc:id="f767893a-4e56-4888-a5b7-c58a0c9a3960" message="Input message received"/>
+		<set-variable value='#[payload]' doc:name="Set Variable" doc:id="f4af73fa-4125-4a93-b322-69feb21cfb45" variableName="input"/>
+		<ee:transform doc:name="Transform Message" doc:id="45fafd87-34c1-42ff-8d38-e8dc9e936b54" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "user",
+            "content": vars."input"
+        }
+    ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="ChatGPT completion API Request" doc:id="70bbf3b8-fb8d-4e2c-adcc-63aac3967ba3" config-ref="HTTP_Request_configuration" path="/v1/chat/completions" responseTimeout="999999">
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="b7a4cfe1-41a5-4228-ae01-14e1fa3b641b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text
+var p = payload.choices.message.content
+var data = p reduce ((val, acc) -> acc ++ val)
+---
+data]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="016a0919-0bf5-4588-8b3b-f948aa3d42b2" message="Search Operation Completed"/>
+	</flow>
+</mule>
